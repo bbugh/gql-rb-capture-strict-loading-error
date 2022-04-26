@@ -73,3 +73,8 @@ end
 
 gem "graphql", "~> 2.0"
 gem "graphiql-rails", group: :development
+
+gem "pry-rails"
+gem "faker", "~> 2.20"
+
+gem "factory_bot_rails", "~> 6.2"

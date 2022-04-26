@@ -48,4 +48,21 @@ class GraphqlErrorSchema < GraphQL::Schema
     full_global_id = "gid://#{GlobalID.app}/#{id}"
     GlobalID::Locator.locate(full_global_id)
   end
+
+  # Works
+  rescue_from(ActiveRecord::RecordNotFound) do |error, object, args, _context, field|
+    # Raise a graphql-friendly error with a custom message
+    raise GraphQL::ExecutionError.new(
+      "#{field.type.unwrap.graphql_name} object not found",
+      extensions: { code: "NOT_FOUND", args: args&.to_h }
+    )
+  end
+
+  # runs code here, but then the strict loading error is still raised in the controller
+  rescue_from(ActiveRecord::StrictLoadingViolationError) do |error, object, args, context, field|
+    raise GraphQL::ExecutionError.new(
+      "#{context[:current_path].join(".")} attempted to lazily load an association: #{error.message}",
+      extensions: { code: "LAZY_LOAD", args: args&.to_h }
+    )
+  end
 end

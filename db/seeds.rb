@@ -5,3 +5,6 @@
 #
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
+
+posts = FactoryBot.create_list(:post, 10)
+FactoryBot.build_list(:comment, 50) { |c| c.post = posts.sample; c.save! }
