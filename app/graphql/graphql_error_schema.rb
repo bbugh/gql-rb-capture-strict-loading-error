@@ -49,7 +49,7 @@ class GraphqlErrorSchema < GraphQL::Schema
     GlobalID::Locator.locate(full_global_id)
   end
 
-  # Works
+  # ✅ Works fine e.g. `{ restaurant(id: 139048) { id } }`
   rescue_from(ActiveRecord::RecordNotFound) do |error, object, args, _context, field|
     # Raise a graphql-friendly error with a custom message
     raise GraphQL::ExecutionError.new(
@@ -58,8 +58,13 @@ class GraphqlErrorSchema < GraphQL::Schema
     )
   end
 
-  # runs code here, but then the strict loading error is still raised in the controller
+  # ❌ Doesn't work, isn't captured, and the error shows up in the controller
   rescue_from(ActiveRecord::StrictLoadingViolationError) do |error, object, args, context, field|
+    puts "*" * 80
+    puts "GOT TO THE ActiveRecord::StrictLoadingViolationError ERROR HANDLER"
+    puts "*" * 80
+
+    # This should work, but it doesn't!
     raise GraphQL::ExecutionError.new(
       "#{context[:current_path].join(".")} attempted to lazily load an association: #{error.message}",
       extensions: { code: "LAZY_LOAD", args: args&.to_h }
